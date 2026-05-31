@@ -1,7 +1,0 @@
-{
-  "enabled": false,
-  "teamFadeColor": {
-    "CT": [255, 0, 0, 180],
-    "T": [0, 0, 255, 180]
-  }
-}

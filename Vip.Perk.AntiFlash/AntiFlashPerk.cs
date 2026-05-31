@@ -5,7 +5,6 @@ using Sharp.Shared;
 using Sharp.Shared.Listeners;
 using Sharp.Shared.Managers;
 using Sharp.Shared.Objects;
-using Vip.Perk.AntiFlash.Configuration;
 using Vip.Shared;
 using Vip.Shared.Perks;
 
@@ -18,26 +17,21 @@ internal sealed class AntiFlashPerk : IVipPerk, IEventListener
     public string Description => "Reduces flashbang blindness for VIP players.";
     public bool   DefaultEnabled => false;
 
-    public IReadOnlyList<VipPerkSetting> Settings { get; }
+    public IReadOnlyList<VipPerkSetting> Settings { get; } =
+    [
+        new VipPerkSetting("mode", "Mode (1=team,2=self,3=both)", VipPerkSettingType.Int, "1", "1", "3"),
+    ];
 
     private IVipShared?       _vip;
     private IVipPerkRegistry? _registry;
 
-    private readonly IEventManager      _eventManager;
-    private readonly ILogger            _logger;
-    private readonly AntiFlashConfig    _config;
+    private readonly IEventManager _eventManager;
+    private readonly ILogger       _logger;
 
-    public AntiFlashPerk(ISharedSystem sharedSystem, ILogger logger, AntiFlashConfig config)
+    public AntiFlashPerk(ISharedSystem sharedSystem, ILogger logger)
     {
         _eventManager = sharedSystem.GetEventManager();
         _logger       = logger;
-        _config       = config;
-
-        Settings =
-        [
-            new VipPerkSetting("mode", "Mode (1=team,2=self,3=both)", VipPerkSettingType.Int,
-                _config.Mode.ToString(), "1", "3"),
-        ];
     }
 
     internal void SetDependencies(IVipShared vip, IVipPerkRegistry registry)
@@ -74,7 +68,7 @@ internal sealed class AntiFlashPerk : IVipPerk, IEventListener
         if (pawn?.IsValidEntity is not true) return;
 
         prefs.Settings.TryGetValue("mode", out var raw);
-        var mode = int.TryParse(raw, out var m) ? m : _config.Mode;
+        var mode = int.TryParse(raw, out var m) ? m : 1;
 
         var sameTeam = attacker.Team == player.Team;
         switch (mode)

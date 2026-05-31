@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Sharp.Shared;
-using Vip.Perk.Items.Configuration;
 
 namespace Vip.Perk.Items;
 
@@ -10,8 +9,7 @@ public sealed class ItemsPlugin : IModSharpModule
     public string DisplayAuthor => "yappershq";
 
     private readonly ILogger<ItemsPlugin> _logger;
-    private readonly InterfaceBridge         _bridge;
-    private readonly ItemsConfig          _config;
+    private readonly InterfaceBridge      _bridge;
     private readonly ItemsPerk            _perk;
 
     public ItemsPlugin(ISharedSystem sharedSystem, string dllPath, string sharpPath,
@@ -19,17 +17,11 @@ public sealed class ItemsPlugin : IModSharpModule
     {
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<ItemsPlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
-        _config = ItemsConfig.Load(sharpPath);
-        _perk   = new ItemsPerk(sharedSystem, _logger, _config);
+        _perk   = new ItemsPerk(sharedSystem, _logger);
     }
 
     public bool Init()
     {
-        if (!_config.Enabled)
-        {
-            _logger.LogInformation("[Vip.Perk.Items] Disabled via config — skipping.");
-            return true;
-        }
         _perk.Install();
         return true;
     }
@@ -38,7 +30,6 @@ public sealed class ItemsPlugin : IModSharpModule
 
     public void OnAllModulesLoaded()
     {
-        if (!_config.Enabled) return;
         if (!_bridge.ResolveRequired())
         {
             _logger.LogWarning("[Vip.Perk.Items] IVipShared or IVipPerkRegistry not available — perk inactive.");
@@ -49,8 +40,5 @@ public sealed class ItemsPlugin : IModSharpModule
         _logger.LogInformation("[Vip.Perk.Items] Registered.");
     }
 
-    public void Shutdown()
-    {
-        if (_config.Enabled) _perk.Uninstall();
-    }
+    public void Shutdown() => _perk.Uninstall();
 }

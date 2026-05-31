@@ -6,7 +6,6 @@ using Sharp.Shared.GameEntities;
 using Sharp.Shared.Listeners;
 using Sharp.Shared.Managers;
 using Sharp.Shared.Types;
-using Vip.Perk.SmokeColor.Configuration;
 using Vip.Shared;
 using Vip.Shared.Perks;
 
@@ -19,28 +18,23 @@ internal sealed class SmokeColorPerk : IVipPerk, IEntityListener
     public string Description => "Changes the smoke grenade color for VIP players based on team.";
     public bool   DefaultEnabled => false;
 
-    public IReadOnlyList<VipPerkSetting> Settings { get; }
+    public IReadOnlyList<VipPerkSetting> Settings { get; } =
+    [
+        new VipPerkSetting("teamColor", "Team Color (CT/T JSON)", VipPerkSettingType.String, "CT:0,180,255 T:255,180,0"),
+    ];
 
     private IVipShared?       _vip;
     private IVipPerkRegistry? _registry;
 
-    private readonly IEntityManager   _entityManager;
-    private readonly IModSharp        _modSharp;
-    private readonly ILogger          _logger;
-    private readonly SmokeColorConfig _config;
+    private readonly IEntityManager _entityManager;
+    private readonly IModSharp      _modSharp;
+    private readonly ILogger        _logger;
 
-    public SmokeColorPerk(ISharedSystem sharedSystem, ILogger logger, SmokeColorConfig config)
+    public SmokeColorPerk(ISharedSystem sharedSystem, ILogger logger)
     {
         _entityManager = sharedSystem.GetEntityManager();
         _modSharp      = sharedSystem.GetModSharp();
         _logger        = logger;
-        _config        = config;
-
-        Settings =
-        [
-            new VipPerkSetting("teamColor", "Team Color (CT/T JSON)", VipPerkSettingType.String,
-                "CT:0,180,255 T:255,180,0"),
-        ];
     }
 
     internal void SetDependencies(IVipShared vip, IVipPerkRegistry registry)
@@ -77,12 +71,6 @@ internal sealed class SmokeColorPerk : IVipPerk, IEntityListener
 
             var teamKey = controller.Team == CStrikeTeam.CT ? "CT" : "T";
             int r = 255, g = 0, b = 255;
-            if (_config.TeamColor.TryGetValue(teamKey, out var rgb) && rgb.Length == 3)
-            {
-                r = rgb[0];
-                g = rgb[1];
-                b = rgb[2];
-            }
 
             ent.SetNetVar("m_vSmokeColor", new Vector(r, g, b));
             _logger.LogInformation("[Vip.Perk.SmokeColor] {r},{g},{b} for {n}", r, g, b, controller.PlayerName);

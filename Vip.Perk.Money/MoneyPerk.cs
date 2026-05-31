@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using Sharp.Shared;
 using Sharp.Shared.HookParams;
 using Sharp.Shared.Managers;
-using Vip.Perk.Money.Configuration;
 using Vip.Shared;
 using Vip.Shared.Perks;
 
@@ -17,7 +16,10 @@ internal sealed class MoneyPerk : IVipPerk
     public string Description => "Gives VIP players a bonus cash amount on round start.";
     public bool   DefaultEnabled => false;
 
-    public IReadOnlyList<VipPerkSetting> Settings { get; }
+    public IReadOnlyList<VipPerkSetting> Settings { get; } =
+    [
+        new VipPerkSetting("bonusAmount", "Bonus Cash", VipPerkSettingType.Int, "1000", "0", "16000"),
+    ];
 
     private IVipShared?       _vip;
     private IVipPerkRegistry? _registry;
@@ -25,23 +27,15 @@ internal sealed class MoneyPerk : IVipPerk
     private readonly IHookManager _hookManager;
     private readonly IModSharp    _modSharp;
     private readonly ILogger      _logger;
-    private readonly MoneyConfig  _config;
 
     private readonly Action<IPlayerSpawnForwardParams> _onSpawn;
 
-    public MoneyPerk(ISharedSystem sharedSystem, ILogger logger, MoneyConfig config)
+    public MoneyPerk(ISharedSystem sharedSystem, ILogger logger)
     {
         _hookManager = sharedSystem.GetHookManager();
         _modSharp    = sharedSystem.GetModSharp();
         _logger      = logger;
-        _config      = config;
         _onSpawn     = OnPlayerSpawn;
-
-        Settings =
-        [
-            new VipPerkSetting("bonusAmount", "Bonus Cash", VipPerkSettingType.Int,
-                _config.BonusAmount.ToString(), "0", "16000"),
-        ];
     }
 
     internal void SetDependencies(IVipShared vip, IVipPerkRegistry registry)
@@ -65,7 +59,7 @@ internal sealed class MoneyPerk : IVipPerk
         if (prefs is null || !prefs.Enabled) return;
 
         prefs.Settings.TryGetValue("bonusAmount", out var raw);
-        var bonus = int.TryParse(raw, out var b) ? b : _config.BonusAmount;
+        var bonus = int.TryParse(raw, out var b) ? b : 1000;
 
         _modSharp.PushTimer(() =>
         {

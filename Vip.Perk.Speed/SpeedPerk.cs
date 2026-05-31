@@ -6,7 +6,6 @@ using Sharp.Shared.Enums;
 using Sharp.Shared.HookParams;
 using Sharp.Shared.Managers;
 using Sharp.Shared.Types;
-using Vip.Perk.Speed.Configuration;
 using Vip.Shared;
 using Vip.Shared.Perks;
 
@@ -19,31 +18,26 @@ internal sealed class SpeedPerk : IVipPerk
     public string Description => "Increases VIP player movement speed.";
     public bool   DefaultEnabled => false;
 
-    public IReadOnlyList<VipPerkSetting> Settings { get; }
+    public IReadOnlyList<VipPerkSetting> Settings { get; } =
+    [
+        new VipPerkSetting("multiplier", "Speed Multiplier", VipPerkSettingType.Float, "1.3", "1.0", "2.0"),
+    ];
 
     private IVipShared?       _vip;
     private IVipPerkRegistry? _registry;
 
     private readonly IHookManager _hookManager;
     private readonly ILogger      _logger;
-    private readonly SpeedConfig  _config;
 
     private readonly Action<IPlayerSpawnForwardParams> _onSpawn;
     private readonly Func<IPlayerGetMaxSpeedHookParams, HookReturnValue<float>, HookReturnValue<float>> _onGetMaxSpeed;
 
-    public SpeedPerk(ISharedSystem sharedSystem, ILogger logger, SpeedConfig config)
+    public SpeedPerk(ISharedSystem sharedSystem, ILogger logger)
     {
         _hookManager   = sharedSystem.GetHookManager();
         _logger        = logger;
-        _config        = config;
         _onSpawn       = OnPlayerSpawn;
         _onGetMaxSpeed = OnPlayerGetMaxSpeedPre;
-
-        Settings =
-        [
-            new VipPerkSetting("multiplier", "Speed Multiplier", VipPerkSettingType.Float,
-                _config.Multiplier.ToString(System.Globalization.CultureInfo.InvariantCulture), "1.0", "2.0"),
-        ];
     }
 
     internal void SetDependencies(IVipShared vip, IVipPerkRegistry registry)
@@ -80,7 +74,7 @@ internal sealed class SpeedPerk : IVipPerk
 
         prefs.Settings.TryGetValue("multiplier", out var raw);
         var mult = float.TryParse(raw, System.Globalization.NumberStyles.Float,
-            System.Globalization.CultureInfo.InvariantCulture, out var f) ? f : _config.Multiplier;
+            System.Globalization.CultureInfo.InvariantCulture, out var f) ? f : 1.3f;
 
         pawn.VelocityModifier = mult;
         _logger.LogInformation("[Vip.Perk.Speed] mult={m} for {n}", mult, controller.PlayerName);
@@ -96,7 +90,7 @@ internal sealed class SpeedPerk : IVipPerk
 
         prefs.Settings.TryGetValue("multiplier", out var raw);
         var mult = float.TryParse(raw, System.Globalization.NumberStyles.Float,
-            System.Globalization.CultureInfo.InvariantCulture, out var f) ? f : _config.Multiplier;
+            System.Globalization.CultureInfo.InvariantCulture, out var f) ? f : 1.3f;
 
         return new HookReturnValue<float>(EHookAction.SkipCallReturnOverride, mult * 250f);
     }

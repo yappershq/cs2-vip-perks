@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using Sharp.Shared;
 using Sharp.Shared.HookParams;
 using Sharp.Shared.Managers;
-using Vip.Perk.Armor.Configuration;
 using Vip.Shared;
 using Vip.Shared.Perks;
 
@@ -17,29 +16,24 @@ internal sealed class ArmorPerk : IVipPerk
     public string Description => "Grants kevlar on spawn.";
     public bool   DefaultEnabled => false;
 
-    public IReadOnlyList<VipPerkSetting> Settings { get; }
+    public IReadOnlyList<VipPerkSetting> Settings { get; } =
+    [
+        new VipPerkSetting("armorValue", "Armor Value", VipPerkSettingType.Int, "50", "1", "100"),
+    ];
 
     private IVipShared?       _vip;
     private IVipPerkRegistry? _registry;
 
-    private readonly IHookManager  _hookManager;
-    private readonly ILogger       _logger;
-    private readonly ArmorConfig   _config;
+    private readonly IHookManager _hookManager;
+    private readonly ILogger      _logger;
 
     private readonly Action<IPlayerSpawnForwardParams> _onSpawn;
 
-    public ArmorPerk(ISharedSystem sharedSystem, ILogger logger, ArmorConfig config)
+    public ArmorPerk(ISharedSystem sharedSystem, ILogger logger)
     {
         _hookManager = sharedSystem.GetHookManager();
         _logger      = logger;
-        _config      = config;
         _onSpawn     = OnPlayerSpawn;
-
-        Settings =
-        [
-            new VipPerkSetting("armorValue", "Armor Value", VipPerkSettingType.Int,
-                _config.ArmorValue.ToString(), "1", "100"),
-        ];
     }
 
     internal void SetDependencies(IVipShared vip, IVipPerkRegistry registry)
@@ -66,7 +60,7 @@ internal sealed class ArmorPerk : IVipPerk
         if (pawn?.IsValidEntity is not true) return;
 
         prefs.Settings.TryGetValue("armorValue", out var raw);
-        var armor = int.TryParse(raw, out var k) ? k : _config.ArmorValue;
+        var armor = int.TryParse(raw, out var k) ? k : 50;
 
         pawn.ArmorValue = armor;
         _logger.LogInformation("[Vip.Perk.Armor] armor={a} for {n}", armor, controller.PlayerName);

@@ -6,7 +6,6 @@ using Sharp.Shared.Enums;
 using Sharp.Shared.HookParams;
 using Sharp.Shared.Managers;
 using Sharp.Shared.Types;
-using Vip.Perk.NoFallDamage.Configuration;
 using Vip.Shared;
 using Vip.Shared.Perks;
 
@@ -19,29 +18,24 @@ internal sealed class NoFallDamagePerk : IVipPerk
     public string Description => "Prevents VIP players from taking fall damage.";
     public bool   DefaultEnabled => false;
 
-    public IReadOnlyList<VipPerkSetting> Settings { get; }
+    public IReadOnlyList<VipPerkSetting> Settings { get; } =
+    [
+        new VipPerkSetting("mode", "Mode", VipPerkSettingType.Int, "-1", "-1", "1"),
+    ];
 
     private IVipShared?       _vip;
     private IVipPerkRegistry? _registry;
 
-    private readonly IHookManager       _hookManager;
-    private readonly ILogger            _logger;
-    private readonly NoFallDamageConfig _config;
+    private readonly IHookManager _hookManager;
+    private readonly ILogger      _logger;
 
     private readonly Func<IPlayerDispatchTraceAttackHookParams, HookReturnValue<long>, HookReturnValue<long>> _onDamagePre;
 
-    public NoFallDamagePerk(ISharedSystem sharedSystem, ILogger logger, NoFallDamageConfig config)
+    public NoFallDamagePerk(ISharedSystem sharedSystem, ILogger logger)
     {
         _hookManager = sharedSystem.GetHookManager();
         _logger      = logger;
-        _config      = config;
         _onDamagePre = OnPlayerTakeDamagePre;
-
-        Settings =
-        [
-            new VipPerkSetting("mode", "Mode", VipPerkSettingType.Int,
-                _config.Mode.ToString(), "-1", "1"),
-        ];
     }
 
     internal void SetDependencies(IVipShared vip, IVipPerkRegistry registry)

@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Sharp.Shared;
-using Vip.Perk.NoFallDamage.Configuration;
 
 namespace Vip.Perk.NoFallDamage;
 
@@ -10,8 +9,7 @@ public sealed class NoFallDamagePlugin : IModSharpModule
     public string DisplayAuthor => "yappershq";
 
     private readonly ILogger<NoFallDamagePlugin> _logger;
-    private readonly InterfaceBridge         _bridge;
-    private readonly NoFallDamageConfig          _config;
+    private readonly InterfaceBridge             _bridge;
     private readonly NoFallDamagePerk            _perk;
 
     public NoFallDamagePlugin(ISharedSystem sharedSystem, string dllPath, string sharpPath,
@@ -19,17 +17,11 @@ public sealed class NoFallDamagePlugin : IModSharpModule
     {
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<NoFallDamagePlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
-        _config = NoFallDamageConfig.Load(sharpPath);
-        _perk   = new NoFallDamagePerk(sharedSystem, _logger, _config);
+        _perk   = new NoFallDamagePerk(sharedSystem, _logger);
     }
 
     public bool Init()
     {
-        if (!_config.Enabled)
-        {
-            _logger.LogInformation("[Vip.Perk.NoFallDamage] Disabled via config — skipping.");
-            return true;
-        }
         _perk.Install();
         return true;
     }
@@ -38,7 +30,6 @@ public sealed class NoFallDamagePlugin : IModSharpModule
 
     public void OnAllModulesLoaded()
     {
-        if (!_config.Enabled) return;
         if (!_bridge.ResolveRequired())
         {
             _logger.LogWarning("[Vip.Perk.NoFallDamage] IVipShared or IVipPerkRegistry not available — perk inactive.");
@@ -49,8 +40,5 @@ public sealed class NoFallDamagePlugin : IModSharpModule
         _logger.LogInformation("[Vip.Perk.NoFallDamage] Registered.");
     }
 
-    public void Shutdown()
-    {
-        if (_config.Enabled) _perk.Uninstall();
-    }
+    public void Shutdown() => _perk.Uninstall();
 }

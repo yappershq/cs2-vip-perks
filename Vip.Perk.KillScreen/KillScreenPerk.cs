@@ -9,7 +9,6 @@ using Sharp.Shared.Managers;
 using Sharp.Shared.Objects;
 using Sharp.Shared.Types;
 using Sharp.Shared.Types.CppProtobuf;
-using Vip.Perk.KillScreen.Configuration;
 using Vip.Shared;
 using Vip.Shared.Perks;
 
@@ -22,34 +21,25 @@ internal sealed class KillScreenPerk : IVipPerk, IEventListener
     public string Description => "Flashes a color on-screen when the VIP player gets a kill.";
     public bool   DefaultEnabled => false;
 
-    public IReadOnlyList<VipPerkSetting> Settings { get; }
+    public IReadOnlyList<VipPerkSetting> Settings { get; } =
+    [
+        new VipPerkSetting("fadeColorCT", "Fade Color CT (R,G,B,A)", VipPerkSettingType.String, "255,0,0,180"),
+        new VipPerkSetting("fadeColorT",  "Fade Color T (R,G,B,A)",  VipPerkSettingType.String, "0,0,255,180"),
+        new VipPerkSetting("duration",    "Fade Duration (s)",         VipPerkSettingType.Float, "2.0", "0.5", "10.0"),
+    ];
 
     private IVipShared?       _vip;
     private IVipPerkRegistry? _registry;
 
-    private readonly IEventManager     _eventManager;
-    private readonly IModSharp         _modSharp;
-    private readonly ILogger           _logger;
-    private readonly KillScreenConfig  _config;
+    private readonly IEventManager _eventManager;
+    private readonly IModSharp     _modSharp;
+    private readonly ILogger       _logger;
 
-    public KillScreenPerk(ISharedSystem sharedSystem, ILogger logger, KillScreenConfig config)
+    public KillScreenPerk(ISharedSystem sharedSystem, ILogger logger)
     {
         _eventManager = sharedSystem.GetEventManager();
         _modSharp     = sharedSystem.GetModSharp();
         _logger       = logger;
-        _config       = config;
-
-        _config.TeamFadeColor.TryGetValue("CT", out var ct);
-        _config.TeamFadeColor.TryGetValue("T", out var t);
-        var ctDefault = ct is { Length: 4 } ? $"{ct[0]},{ct[1]},{ct[2]},{ct[3]}" : "255,0,0,180";
-        var tDefault  = t  is { Length: 4 } ? $"{t[0]},{t[1]},{t[2]},{t[3]}"   : "0,0,255,180";
-
-        Settings =
-        [
-            new VipPerkSetting("fadeColorCT", "Fade Color CT (R,G,B,A)", VipPerkSettingType.String, ctDefault),
-            new VipPerkSetting("fadeColorT",  "Fade Color T (R,G,B,A)",  VipPerkSettingType.String, tDefault),
-            new VipPerkSetting("duration",    "Fade Duration (s)",         VipPerkSettingType.Float, "2.0", "0.5", "10.0"),
-        ];
     }
 
     internal void SetDependencies(IVipShared vip, IVipPerkRegistry registry)
@@ -83,7 +73,6 @@ internal sealed class KillScreenPerk : IVipPerk, IEventListener
         var prefs = _registry?.GetPreferences(killer.SteamId, Id);
         if (prefs is null || !prefs.Enabled) return;
 
-        var teamKey    = killer.Team == CStrikeTeam.CT ? "CT" : "T";
         var settingKey = killer.Team == CStrikeTeam.CT ? "fadeColorCT" : "fadeColorT";
 
         prefs.Settings.TryGetValue("duration", out var rawDur);
@@ -103,10 +92,6 @@ internal sealed class KillScreenPerk : IVipPerk, IEventListener
                 byte.TryParse(parts[2].Trim(), out b);
                 byte.TryParse(parts[3].Trim(), out a);
             }
-        }
-        else if (_config.TeamFadeColor.TryGetValue(teamKey, out var cfg) && cfg.Length == 4)
-        {
-            r = (byte)cfg[0]; g = (byte)cfg[1]; b = (byte)cfg[2]; a = (byte)cfg[3];
         }
 
         var filter = new RecipientFilter(killer.PlayerSlot);

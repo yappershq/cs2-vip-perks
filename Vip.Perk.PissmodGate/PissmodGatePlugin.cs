@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Sharp.Shared;
-using Vip.Perk.PissmodGate.Configuration;
 
 namespace Vip.Perk.PissmodGate;
 
@@ -11,7 +10,6 @@ public sealed class PissmodGatePlugin : IModSharpModule
 
     private readonly ILogger<PissmodGatePlugin> _logger;
     private readonly InterfaceBridge            _bridge;
-    private readonly PissmodGateConfig          _config;
     private readonly PissmodGatePerk            _perk;
 
     public PissmodGatePlugin(ISharedSystem sharedSystem, string dllPath, string sharpPath,
@@ -19,7 +17,6 @@ public sealed class PissmodGatePlugin : IModSharpModule
     {
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<PissmodGatePlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
-        _config = PissmodGateConfig.Load(sharpPath);
         _perk   = new PissmodGatePerk();
     }
 
@@ -29,12 +26,6 @@ public sealed class PissmodGatePlugin : IModSharpModule
 
     public void OnAllModulesLoaded()
     {
-        if (!_config.Enabled)
-        {
-            _logger.LogInformation("[Vip.Perk.PissmodGate] Disabled via config — skipping.");
-            return;
-        }
-
         if (!_bridge.Resolve())
         {
             _logger.LogWarning("[Vip.Perk.PissmodGate] IVipShared, IVipPerkRegistry, or IPissModShared not available — perk inactive.");

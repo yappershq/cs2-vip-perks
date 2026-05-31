@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Sharp.Shared;
-using Vip.Perk.PoopGate.Configuration;
 
 namespace Vip.Perk.PoopGate;
 
@@ -11,7 +10,6 @@ public sealed class PoopGatePlugin : IModSharpModule
 
     private readonly ILogger<PoopGatePlugin> _logger;
     private readonly InterfaceBridge         _bridge;
-    private readonly PoopGateConfig          _config;
     private readonly PoopGatePerk            _perk;
 
     public PoopGatePlugin(ISharedSystem sharedSystem, string dllPath, string sharpPath,
@@ -19,7 +17,6 @@ public sealed class PoopGatePlugin : IModSharpModule
     {
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<PoopGatePlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
-        _config = PoopGateConfig.Load(sharpPath);
         _perk   = new PoopGatePerk();
     }
 
@@ -29,12 +26,6 @@ public sealed class PoopGatePlugin : IModSharpModule
 
     public void OnAllModulesLoaded()
     {
-        if (!_config.Enabled)
-        {
-            _logger.LogInformation("[Vip.Perk.PoopGate] Disabled via config — skipping.");
-            return;
-        }
-
         if (!_bridge.Resolve())
         {
             _logger.LogWarning("[Vip.Perk.PoopGate] IVipShared, IVipPerkRegistry, or IPoopShared not available — perk inactive.");

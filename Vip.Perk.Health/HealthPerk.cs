@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using Sharp.Shared;
 using Sharp.Shared.HookParams;
 using Sharp.Shared.Managers;
-using Vip.Perk.Health.Configuration;
 using Vip.Shared;
 using Vip.Shared.Perks;
 
@@ -17,29 +16,24 @@ internal sealed class HealthPerk : IVipPerk
     public string Description => "Grants extra HP on spawn.";
     public bool   DefaultEnabled => false;
 
-    public IReadOnlyList<VipPerkSetting> Settings { get; }
+    public IReadOnlyList<VipPerkSetting> Settings { get; } =
+    [
+        new VipPerkSetting("healthValue", "Health Value (total HP)", VipPerkSettingType.Int, "150", "100", "500"),
+    ];
 
     private IVipShared?       _vip;
     private IVipPerkRegistry? _registry;
 
-    private readonly IHookManager  _hookManager;
-    private readonly ILogger       _logger;
-    private readonly HealthConfig  _config;
+    private readonly IHookManager _hookManager;
+    private readonly ILogger      _logger;
 
     private readonly Action<IPlayerSpawnForwardParams> _onSpawn;
 
-    public HealthPerk(ISharedSystem sharedSystem, ILogger logger, HealthConfig config)
+    public HealthPerk(ISharedSystem sharedSystem, ILogger logger)
     {
         _hookManager = sharedSystem.GetHookManager();
         _logger      = logger;
-        _config      = config;
         _onSpawn     = OnPlayerSpawn;
-
-        Settings =
-        [
-            new VipPerkSetting("healthValue", "Health Value (total HP)", VipPerkSettingType.Int,
-                _config.HealthValue.ToString(), "100", "500"),
-        ];
     }
 
     internal void SetDependencies(IVipShared vip, IVipPerkRegistry registry)
@@ -66,7 +60,7 @@ internal sealed class HealthPerk : IVipPerk
         if (pawn?.IsValidEntity is not true) return;
 
         prefs.Settings.TryGetValue("healthValue", out var raw);
-        var hp = int.TryParse(raw, out var h) ? h : _config.HealthValue;
+        var hp = int.TryParse(raw, out var h) ? h : 150;
 
         pawn.Health    = hp;
         pawn.MaxHealth = hp;

@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Sharp.Shared;
-using Vip.Perk.BunnyHop.Configuration;
 
 namespace Vip.Perk.BunnyHop;
 
@@ -11,7 +10,6 @@ public sealed class BunnyHopPlugin : IModSharpModule
 
     private readonly ILogger<BunnyHopPlugin> _logger;
     private readonly InterfaceBridge         _bridge;
-    private readonly BunnyHopConfig          _config;
     private readonly BunnyHopPerk            _perk;
 
     public BunnyHopPlugin(ISharedSystem sharedSystem, string dllPath, string sharpPath,
@@ -19,17 +17,11 @@ public sealed class BunnyHopPlugin : IModSharpModule
     {
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<BunnyHopPlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
-        _config = BunnyHopConfig.Load(sharpPath);
-        _perk   = new BunnyHopPerk(sharedSystem, _logger, _config);
+        _perk   = new BunnyHopPerk(sharedSystem, _logger);
     }
 
     public bool Init()
     {
-        if (!_config.Enabled)
-        {
-            _logger.LogInformation("[Vip.Perk.BunnyHop] Disabled via config — skipping.");
-            return true;
-        }
         _perk.Install();
         return true;
     }
@@ -38,7 +30,6 @@ public sealed class BunnyHopPlugin : IModSharpModule
 
     public void OnAllModulesLoaded()
     {
-        if (!_config.Enabled) return;
         if (!_bridge.ResolveRequired())
         {
             _logger.LogWarning("[Vip.Perk.BunnyHop] IVipShared or IVipPerkRegistry not available — perk inactive.");
@@ -49,8 +40,5 @@ public sealed class BunnyHopPlugin : IModSharpModule
         _logger.LogInformation("[Vip.Perk.BunnyHop] Registered.");
     }
 
-    public void Shutdown()
-    {
-        if (_config.Enabled) _perk.Uninstall();
-    }
+    public void Shutdown() => _perk.Uninstall();
 }

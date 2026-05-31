@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Sharp.Shared;
-using Vip.Perk.HitMarker.Configuration;
 
 namespace Vip.Perk.HitMarker;
 
@@ -11,7 +10,6 @@ public sealed class HitMarkerPlugin : IModSharpModule
 
     private readonly ILogger<HitMarkerPlugin> _logger;
     private readonly InterfaceBridge          _bridge;
-    private readonly HitMarkerConfig          _config;
     private readonly HitMarkerPerk            _perk;
 
     public HitMarkerPlugin(ISharedSystem sharedSystem, string dllPath, string sharpPath,
@@ -19,7 +17,6 @@ public sealed class HitMarkerPlugin : IModSharpModule
     {
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<HitMarkerPlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
-        _config = HitMarkerConfig.Load(sharpPath);
         _perk   = new HitMarkerPerk();
     }
 
@@ -29,12 +26,6 @@ public sealed class HitMarkerPlugin : IModSharpModule
 
     public void OnAllModulesLoaded()
     {
-        if (!_config.Enabled)
-        {
-            _logger.LogInformation("[Vip.Perk.HitMarker] Disabled via config — skipping.");
-            return;
-        }
-
         if (!_bridge.Resolve())
         {
             _logger.LogWarning("[Vip.Perk.HitMarker] IVipShared, IVipPerkRegistry, or IHitMarkShared not available — perk inactive.");

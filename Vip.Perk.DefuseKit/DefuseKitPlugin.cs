@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Sharp.Shared;
-using Vip.Perk.DefuseKit.Configuration;
 
 namespace Vip.Perk.DefuseKit;
 
@@ -10,8 +9,7 @@ public sealed class DefuseKitPlugin : IModSharpModule
     public string DisplayAuthor => "yappershq";
 
     private readonly ILogger<DefuseKitPlugin> _logger;
-    private readonly InterfaceBridge         _bridge;
-    private readonly DefuseKitConfig          _config;
+    private readonly InterfaceBridge          _bridge;
     private readonly DefuseKitPerk            _perk;
 
     public DefuseKitPlugin(ISharedSystem sharedSystem, string dllPath, string sharpPath,
@@ -19,17 +17,11 @@ public sealed class DefuseKitPlugin : IModSharpModule
     {
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<DefuseKitPlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
-        _config = DefuseKitConfig.Load(sharpPath);
-        _perk   = new DefuseKitPerk(sharedSystem, _logger, _config);
+        _perk   = new DefuseKitPerk(sharedSystem, _logger);
     }
 
     public bool Init()
     {
-        if (!_config.Enabled)
-        {
-            _logger.LogInformation("[Vip.Perk.DefuseKit] Disabled via config — skipping.");
-            return true;
-        }
         _perk.Install();
         return true;
     }
@@ -38,7 +30,6 @@ public sealed class DefuseKitPlugin : IModSharpModule
 
     public void OnAllModulesLoaded()
     {
-        if (!_config.Enabled) return;
         if (!_bridge.ResolveRequired())
         {
             _logger.LogWarning("[Vip.Perk.DefuseKit] IVipShared or IVipPerkRegistry not available — perk inactive.");
@@ -49,8 +40,5 @@ public sealed class DefuseKitPlugin : IModSharpModule
         _logger.LogInformation("[Vip.Perk.DefuseKit] Registered.");
     }
 
-    public void Shutdown()
-    {
-        if (_config.Enabled) _perk.Uninstall();
-    }
+    public void Shutdown() => _perk.Uninstall();
 }

@@ -8,7 +8,6 @@ using Sharp.Shared.HookParams;
 using Sharp.Shared.Managers;
 using Sharp.Shared.Objects;
 using Sharp.Shared.Types;
-using Vip.Perk.BunnyHop.Configuration;
 using Vip.Shared;
 using Vip.Shared.Perks;
 
@@ -21,34 +20,28 @@ internal sealed class BunnyHopPerk : IVipPerk
     public string Description => "Enables auto-bunny-hopping for VIP players.";
     public bool   DefaultEnabled => false;
 
-    public IReadOnlyList<VipPerkSetting> Settings { get; }
+    public IReadOnlyList<VipPerkSetting> Settings { get; } =
+    [
+        new VipPerkSetting("duration", "Duration (s)", VipPerkSettingType.Float, "5.0", "0.5", "30.0"),
+        new VipPerkSetting("maxSpeed", "Max Speed", VipPerkSettingType.Float, "350.0", "100.0", "600.0"),
+    ];
 
     private IVipShared?       _vip;
     private IVipPerkRegistry? _registry;
 
-    private readonly IHookManager    _hookManager;
-    private readonly IConVarManager  _conVarManager;
-    private readonly ILogger         _logger;
-    private readonly BunnyHopConfig  _config;
+    private readonly IHookManager   _hookManager;
+    private readonly IConVarManager _conVarManager;
+    private readonly ILogger        _logger;
 
     private readonly Func<IPlayerRunCommandHookParams, HookReturnValue<EmptyHookReturn>, HookReturnValue<EmptyHookReturn>> _onRunCommand;
     private IConVar? _autoBhopCvar;
 
-    public BunnyHopPerk(ISharedSystem sharedSystem, ILogger logger, BunnyHopConfig config)
+    public BunnyHopPerk(ISharedSystem sharedSystem, ILogger logger)
     {
         _hookManager   = sharedSystem.GetHookManager();
         _conVarManager = sharedSystem.GetConVarManager();
         _logger        = logger;
-        _config        = config;
         _onRunCommand  = OnPlayerRunCommandPre;
-
-        Settings =
-        [
-            new VipPerkSetting("duration", "Duration (s)", VipPerkSettingType.Float,
-                _config.Duration.ToString(CultureInfo.InvariantCulture), "0.5", "30.0"),
-            new VipPerkSetting("maxSpeed", "Max Speed", VipPerkSettingType.Float,
-                _config.MaxSpeed.ToString(CultureInfo.InvariantCulture), "100.0", "600.0"),
-        ];
     }
 
     internal void SetDependencies(IVipShared vip, IVipPerkRegistry registry)

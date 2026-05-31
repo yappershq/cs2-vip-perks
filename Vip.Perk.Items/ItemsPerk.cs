@@ -5,7 +5,6 @@ using Sharp.Shared;
 using Sharp.Shared.Enums;
 using Sharp.Shared.HookParams;
 using Sharp.Shared.Managers;
-using Vip.Perk.Items.Configuration;
 using Vip.Shared;
 using Vip.Shared.Perks;
 
@@ -18,7 +17,10 @@ internal sealed class ItemsPerk : IVipPerk
     public string Description => "Grants extra weapons or grenades to VIP players on spawn.";
     public bool   DefaultEnabled => false;
 
-    public IReadOnlyList<VipPerkSetting> Settings { get; }
+    public IReadOnlyList<VipPerkSetting> Settings { get; } =
+    [
+        new VipPerkSetting("teamItems", "Team Items (JSON: {\"CT\":[...],\"T\":[...]})", VipPerkSettingType.String, ""),
+    ];
 
     private IVipShared?       _vip;
     private IVipPerkRegistry? _registry;
@@ -26,22 +28,15 @@ internal sealed class ItemsPerk : IVipPerk
     private readonly IHookManager _hookManager;
     private readonly IModSharp    _modSharp;
     private readonly ILogger      _logger;
-    private readonly ItemsConfig  _config;
 
     private readonly Action<IPlayerSpawnForwardParams> _onSpawn;
 
-    public ItemsPerk(ISharedSystem sharedSystem, ILogger logger, ItemsConfig config)
+    public ItemsPerk(ISharedSystem sharedSystem, ILogger logger)
     {
         _hookManager = sharedSystem.GetHookManager();
         _modSharp    = sharedSystem.GetModSharp();
         _logger      = logger;
-        _config      = config;
         _onSpawn     = OnPlayerSpawn;
-
-        Settings =
-        [
-            new VipPerkSetting("teamItems", "Team Items (JSON: {\"CT\":[...],\"T\":[...]})", VipPerkSettingType.String, ""),
-        ];
     }
 
     internal void SetDependencies(IVipShared vip, IVipPerkRegistry registry)
@@ -64,23 +59,33 @@ internal sealed class ItemsPerk : IVipPerk
         var prefs = _registry?.GetPreferences(controller.SteamId, Id);
         if (prefs is null || !prefs.Enabled) return;
 
+        prefs.Settings.TryGetValue("teamItems", out var raw);
+        if (string.IsNullOrWhiteSpace(raw)) return;
+
         var teamKey = controller.Team == CStrikeTeam.CT ? "CT" : "T";
-        _config.TeamItems.TryGetValue(teamKey, out var teamItems);
-        if (teamItems is null || teamItems.Length == 0) return;
 
-        _modSharp.InvokeFrameAction(() =>
+        try
         {
-            var ctrl = controller;
-            if (ctrl?.IsValidEntity is not true) return;
-            var pawn = ctrl.GetPlayerPawn();
-            if (pawn?.IsValidEntity is not true) return;
+            var doc = System.Text.Json.JsonDocument.Parse(raw);
+            if (!doc.RootElement.TryGetProperty(teamKey, out var arr)) return;
 
-            foreach (var item in teamItems)
+            _modSharp.InvokeFrameAction(() =>
             {
-                if (!item.StartsWith("weapon_") && !item.StartsWith("item_")) continue;
-                pawn.GiveNamedItem(item);
-                _logger.LogInformation("[Vip.Perk.Items] gave {i} to {n}", item, ctrl.PlayerName);
-            }
-        });
+                var ctrl = controller;
+                if (ctrl?.IsValidEntity is not true) return;
+                var pawn = ctrl.GetPlayerPawn();
+                if (pawn?.IsValidEntity is not true) return;
+
+                foreach (var item in arr.EnumerateArray())
+                {
+                    var name = item.GetString();
+                    if (name is null) continue;
+                    if (!name.StartsWith("weapon_") && !name.StartsWith("item_")) continue;
+                    pawn.GiveNamedItem(name);
+                    _logger.LogInformation("[Vip.Perk.Items] gave {i} to {n}", name, ctrl.PlayerName);
+                }
+            });
+        }
+        catch { }
     }
 }

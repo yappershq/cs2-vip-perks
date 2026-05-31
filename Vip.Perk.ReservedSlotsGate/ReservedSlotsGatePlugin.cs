@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Sharp.Shared;
-using Vip.Perk.ReservedSlotsGate.Configuration;
 
 namespace Vip.Perk.ReservedSlotsGate;
 
@@ -11,7 +10,6 @@ public sealed class ReservedSlotsGatePlugin : IModSharpModule
 
     private readonly ILogger<ReservedSlotsGatePlugin> _logger;
     private readonly InterfaceBridge                  _bridge;
-    private readonly ReservedSlotsGateConfig          _config;
     private readonly ReservedSlotsGatePerk            _perk;
 
     public ReservedSlotsGatePlugin(ISharedSystem sharedSystem, string dllPath, string sharpPath,
@@ -19,7 +17,6 @@ public sealed class ReservedSlotsGatePlugin : IModSharpModule
     {
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<ReservedSlotsGatePlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
-        _config = ReservedSlotsGateConfig.Load(sharpPath);
         _perk   = new ReservedSlotsGatePerk();
     }
 
@@ -29,12 +26,6 @@ public sealed class ReservedSlotsGatePlugin : IModSharpModule
 
     public void OnAllModulesLoaded()
     {
-        if (!_config.Enabled)
-        {
-            _logger.LogInformation("[Vip.Perk.ReservedSlotsGate] Disabled via config — skipping.");
-            return;
-        }
-
         if (!_bridge.Resolve())
         {
             _logger.LogWarning("[Vip.Perk.ReservedSlotsGate] IVipShared, IVipPerkRegistry, or IReservedSlotsShared not available — perk inactive.");

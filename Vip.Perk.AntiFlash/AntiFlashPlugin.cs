@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Sharp.Shared;
-using Vip.Perk.AntiFlash.Configuration;
 
 namespace Vip.Perk.AntiFlash;
 
@@ -11,7 +10,6 @@ public sealed class AntiFlashPlugin : IModSharpModule
 
     private readonly ILogger<AntiFlashPlugin> _logger;
     private readonly InterfaceBridge          _bridge;
-    private readonly AntiFlashConfig          _config;
     private readonly AntiFlashPerk            _perk;
 
     public AntiFlashPlugin(ISharedSystem sharedSystem, string dllPath, string sharpPath,
@@ -19,17 +17,11 @@ public sealed class AntiFlashPlugin : IModSharpModule
     {
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<AntiFlashPlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
-        _config = AntiFlashConfig.Load(sharpPath);
-        _perk   = new AntiFlashPerk(sharedSystem, _logger, _config);
+        _perk   = new AntiFlashPerk(sharedSystem, _logger);
     }
 
     public bool Init()
     {
-        if (!_config.Enabled)
-        {
-            _logger.LogInformation("[Vip.Perk.AntiFlash] Disabled via config — skipping.");
-            return true;
-        }
         _perk.Install();
         return true;
     }
@@ -38,7 +30,6 @@ public sealed class AntiFlashPlugin : IModSharpModule
 
     public void OnAllModulesLoaded()
     {
-        if (!_config.Enabled) return;
         if (!_bridge.ResolveRequired())
         {
             _logger.LogWarning("[Vip.Perk.AntiFlash] IVipShared or IVipPerkRegistry not available — perk inactive.");
@@ -49,8 +40,5 @@ public sealed class AntiFlashPlugin : IModSharpModule
         _logger.LogInformation("[Vip.Perk.AntiFlash] Registered.");
     }
 
-    public void Shutdown()
-    {
-        if (_config.Enabled) _perk.Uninstall();
-    }
+    public void Shutdown() => _perk.Uninstall();
 }

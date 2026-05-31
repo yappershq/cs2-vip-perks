@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Sharp.Shared;
-using Vip.Perk.Money.Configuration;
 
 namespace Vip.Perk.Money;
 
@@ -10,8 +9,7 @@ public sealed class MoneyPlugin : IModSharpModule
     public string DisplayAuthor => "yappershq";
 
     private readonly ILogger<MoneyPlugin> _logger;
-    private readonly InterfaceBridge         _bridge;
-    private readonly MoneyConfig          _config;
+    private readonly InterfaceBridge      _bridge;
     private readonly MoneyPerk            _perk;
 
     public MoneyPlugin(ISharedSystem sharedSystem, string dllPath, string sharpPath,
@@ -19,17 +17,11 @@ public sealed class MoneyPlugin : IModSharpModule
     {
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<MoneyPlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
-        _config = MoneyConfig.Load(sharpPath);
-        _perk   = new MoneyPerk(sharedSystem, _logger, _config);
+        _perk   = new MoneyPerk(sharedSystem, _logger);
     }
 
     public bool Init()
     {
-        if (!_config.Enabled)
-        {
-            _logger.LogInformation("[Vip.Perk.Money] Disabled via config — skipping.");
-            return true;
-        }
         _perk.Install();
         return true;
     }
@@ -38,7 +30,6 @@ public sealed class MoneyPlugin : IModSharpModule
 
     public void OnAllModulesLoaded()
     {
-        if (!_config.Enabled) return;
         if (!_bridge.ResolveRequired())
         {
             _logger.LogWarning("[Vip.Perk.Money] IVipShared or IVipPerkRegistry not available — perk inactive.");
@@ -49,8 +40,5 @@ public sealed class MoneyPlugin : IModSharpModule
         _logger.LogInformation("[Vip.Perk.Money] Registered.");
     }
 
-    public void Shutdown()
-    {
-        if (_config.Enabled) _perk.Uninstall();
-    }
+    public void Shutdown() => _perk.Uninstall();
 }
