@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Vip.Perk.ReservedSlotsGate</AssemblyName>
+    <RootNamespace>Vip.Perk.ReservedSlotsGate</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="/home/claude/cs2-vip/Vip.Shared/Vip.Shared.csproj" Private="false" />
+    <ProjectReference Include="/home/claude/cs2-reservedslots/ReservedSlots.Shared/ReservedSlots.Shared.csproj" Private="false" />
+  </ItemGroup>
+</Project>

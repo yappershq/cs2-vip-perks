@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Vip.Perk.PissmodGate</AssemblyName>
+    <RootNamespace>Vip.Perk.PissmodGate</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="/home/claude/cs2-vip/Vip.Shared/Vip.Shared.csproj" Private="false" />
+    <ProjectReference Include="/home/claude/cs2-pissmod/PissMod.Shared/PissMod.Shared.csproj" Private="false" />
+  </ItemGroup>
+</Project>

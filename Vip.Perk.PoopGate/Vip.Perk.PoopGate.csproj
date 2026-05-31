@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Vip.Perk.PoopGate</AssemblyName>
+    <RootNamespace>Vip.Perk.PoopGate</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="/home/claude/cs2-vip/Vip.Shared/Vip.Shared.csproj" Private="false" />
+    <ProjectReference Include="/home/claude/poop/Poop.Shared/Poop.Shared.csproj" Private="false" />
+  </ItemGroup>
+</Project>
