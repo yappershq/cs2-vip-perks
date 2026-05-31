@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Vip.Perk.Armor</AssemblyName>
+    <RootNamespace>Vip.Perk.Armor</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="/home/claude/cs2-vip/Vip.Shared/Vip.Shared.csproj" Private="false" />
+  </ItemGroup>
+</Project>
