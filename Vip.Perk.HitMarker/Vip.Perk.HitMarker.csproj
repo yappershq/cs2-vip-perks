@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Vip.Perk.HitMarker</AssemblyName>
+    <RootNamespace>Vip.Perk.HitMarker</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="/home/claude/cs2-vip/Vip.Shared/Vip.Shared.csproj" Private="false" />
+    <ProjectReference Include="/home/claude/cs2-hitmark/HitMark.Shared/HitMark.Shared.csproj" Private="false" />
+  </ItemGroup>
+</Project>

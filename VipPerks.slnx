@@ -14,4 +14,5 @@
   <Project Path="Vip.Perk.SmokeColor/Vip.Perk.SmokeColor.csproj" />
   <Project Path="Vip.Perk.Speed/Vip.Perk.Speed.csproj" />
   <Project Path="Vip.Perk.Zeus/Vip.Perk.Zeus.csproj" />
+  <Project Path="Vip.Perk.HitMarker/Vip.Perk.HitMarker.csproj" />
 </Solution>
