@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Vip.Perk.WeaponMenuGate</AssemblyName>
+    <RootNamespace>Vip.Perk.WeaponMenuGate</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="/home/claude/cs2-vip/Vip.Shared/Vip.Shared.csproj" Private="false" />
+    <ProjectReference Include="/home/claude/cs2-weaponmenu/WeaponMenu.Shared/WeaponMenu.Shared.csproj" Private="false" />
+  </ItemGroup>
+</Project>

@@ -18,4 +18,5 @@
   <Project Path="Vip.Perk.PissmodGate/Vip.Perk.PissmodGate.csproj" />
   <Project Path="Vip.Perk.PoopGate/Vip.Perk.PoopGate.csproj" />
   <Project Path="Vip.Perk.ReservedSlotsGate/Vip.Perk.ReservedSlotsGate.csproj" />
+  <Project Path="Vip.Perk.WeaponMenuGate/Vip.Perk.WeaponMenuGate.csproj" />
 </Solution>
