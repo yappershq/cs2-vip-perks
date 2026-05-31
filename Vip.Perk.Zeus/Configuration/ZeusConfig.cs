@@ -11,7 +11,7 @@ internal sealed class ZeusConfig
 
     internal static ZeusConfig Load(string sharpPath)
     {
-        var path = Path.Combine(sharpPath, "configs", "vip.perk.zeus.json");
+        var path = Path.Combine(sharpPath, "configs", "vip", "perks", "zeus.json");
         if (!File.Exists(path)) return new();
         var json = File.ReadAllText(path);
         return JsonSerializer.Deserialize<ZeusConfig>(json) ?? new();

@@ -11,7 +11,7 @@ internal sealed class KillScreenConfig
 
     internal static KillScreenConfig Load(string sharpPath)
     {
-        var path = Path.Combine(sharpPath, "configs", "vip.perk.killscreen.json");
+        var path = Path.Combine(sharpPath, "configs", "vip", "perks", "killscreen.json");
         if (!File.Exists(path)) return new();
         var json = File.ReadAllText(path);
         return JsonSerializer.Deserialize<KillScreenConfig>(json) ?? new();

@@ -11,7 +11,7 @@ internal sealed class NoFallDamageConfig
 
     internal static NoFallDamageConfig Load(string sharpPath)
     {
-        var path = Path.Combine(sharpPath, "configs", "vip.perk.nofalldamage.json");
+        var path = Path.Combine(sharpPath, "configs", "vip", "perks", "nofalldamage.json");
         if (!File.Exists(path)) return new();
         var json = File.ReadAllText(path);
         return JsonSerializer.Deserialize<NoFallDamageConfig>(json) ?? new();

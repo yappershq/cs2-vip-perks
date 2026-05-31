@@ -11,7 +11,7 @@ internal sealed class GravityConfig
 
     internal static GravityConfig Load(string sharpPath)
     {
-        var path = Path.Combine(sharpPath, "configs", "vip.perk.gravity.json");
+        var path = Path.Combine(sharpPath, "configs", "vip", "perks", "gravity.json");
         if (!File.Exists(path)) return new();
         var json = File.ReadAllText(path);
         return JsonSerializer.Deserialize<GravityConfig>(json) ?? new();

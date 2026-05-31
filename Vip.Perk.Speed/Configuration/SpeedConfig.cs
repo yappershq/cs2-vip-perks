@@ -11,7 +11,7 @@ internal sealed class SpeedConfig
 
     internal static SpeedConfig Load(string sharpPath)
     {
-        var path = Path.Combine(sharpPath, "configs", "vip.perk.speed.json");
+        var path = Path.Combine(sharpPath, "configs", "vip", "perks", "speed.json");
         if (!File.Exists(path)) return new();
         var json = File.ReadAllText(path);
         return JsonSerializer.Deserialize<SpeedConfig>(json) ?? new();

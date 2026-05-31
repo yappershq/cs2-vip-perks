@@ -11,7 +11,7 @@ internal sealed class HealthConfig
 
     internal static HealthConfig Load(string sharpPath)
     {
-        var path = Path.Combine(sharpPath, "configs", "vip.perk.health.json");
+        var path = Path.Combine(sharpPath, "configs", "vip", "perks", "health.json");
         if (!File.Exists(path)) return new();
         var json = File.ReadAllText(path);
         return JsonSerializer.Deserialize<HealthConfig>(json) ?? new();

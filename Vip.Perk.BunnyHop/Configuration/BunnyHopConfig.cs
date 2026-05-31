@@ -11,7 +11,7 @@ internal sealed class BunnyHopConfig
 
     internal static BunnyHopConfig Load(string sharpPath)
     {
-        var path = Path.Combine(sharpPath, "configs", "vip.perk.bunnyhop.json");
+        var path = Path.Combine(sharpPath, "configs", "vip", "perks", "bunnyhop.json");
         if (!File.Exists(path)) return new();
         var json = File.ReadAllText(path);
         return JsonSerializer.Deserialize<BunnyHopConfig>(json) ?? new();

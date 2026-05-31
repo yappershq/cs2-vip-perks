@@ -11,7 +11,7 @@ internal sealed class ArmorConfig
 
     internal static ArmorConfig Load(string sharpPath)
     {
-        var path = Path.Combine(sharpPath, "configs", "vip.perk.armor.json");
+        var path = Path.Combine(sharpPath, "configs", "vip", "perks", "armor.json");
         if (!File.Exists(path)) return new();
         var json = File.ReadAllText(path);
         return JsonSerializer.Deserialize<ArmorConfig>(json) ?? new();

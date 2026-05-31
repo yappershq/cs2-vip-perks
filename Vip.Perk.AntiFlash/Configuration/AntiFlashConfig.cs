@@ -11,7 +11,7 @@ internal sealed class AntiFlashConfig
 
     internal static AntiFlashConfig Load(string sharpPath)
     {
-        var path = Path.Combine(sharpPath, "configs", "vip.perk.antiflash.json");
+        var path = Path.Combine(sharpPath, "configs", "vip", "perks", "antiflash.json");
         if (!File.Exists(path)) return new();
         var json = File.ReadAllText(path);
         return JsonSerializer.Deserialize<AntiFlashConfig>(json) ?? new();

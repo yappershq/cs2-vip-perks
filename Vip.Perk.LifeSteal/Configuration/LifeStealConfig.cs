@@ -11,7 +11,7 @@ internal sealed class LifeStealConfig
 
     internal static LifeStealConfig Load(string sharpPath)
     {
-        var path = Path.Combine(sharpPath, "configs", "vip.perk.lifesteal.json");
+        var path = Path.Combine(sharpPath, "configs", "vip", "perks", "lifesteal.json");
         if (!File.Exists(path)) return new();
         var json = File.ReadAllText(path);
         return JsonSerializer.Deserialize<LifeStealConfig>(json) ?? new();

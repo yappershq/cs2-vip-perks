@@ -11,7 +11,7 @@ internal sealed class MoneyConfig
 
     internal static MoneyConfig Load(string sharpPath)
     {
-        var path = Path.Combine(sharpPath, "configs", "vip.perk.money.json");
+        var path = Path.Combine(sharpPath, "configs", "vip", "perks", "money.json");
         if (!File.Exists(path)) return new();
         var json = File.ReadAllText(path);
         return JsonSerializer.Deserialize<MoneyConfig>(json) ?? new();

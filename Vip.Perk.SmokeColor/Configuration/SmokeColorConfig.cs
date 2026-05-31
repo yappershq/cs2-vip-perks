@@ -11,7 +11,7 @@ internal sealed class SmokeColorConfig
 
     internal static SmokeColorConfig Load(string sharpPath)
     {
-        var path = Path.Combine(sharpPath, "configs", "vip.perk.smokecolor.json");
+        var path = Path.Combine(sharpPath, "configs", "vip", "perks", "smokecolor.json");
         if (!File.Exists(path)) return new();
         var json = File.ReadAllText(path);
         return JsonSerializer.Deserialize<SmokeColorConfig>(json) ?? new();
