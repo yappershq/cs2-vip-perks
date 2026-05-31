@@ -1,1 +1,7 @@
-{ "enabled": false }
+{
+  "enabled": false,
+  "teamColor": {
+    "CT": [0, 180, 255],
+    "T": [255, 180, 0]
+  }
+}

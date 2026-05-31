@@ -1,1 +1,4 @@
-{ "enabled": false }
+{
+  "enabled": false,
+  "percent": 30
+}

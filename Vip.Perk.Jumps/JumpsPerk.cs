@@ -8,6 +8,7 @@ using Sharp.Shared.Listeners;
 using Sharp.Shared.Managers;
 using Sharp.Shared.Objects;
 using Sharp.Shared.Types;
+using Vip.Perk.Jumps.Configuration;
 using Vip.Shared;
 using Vip.Shared.Perks;
 
@@ -20,10 +21,7 @@ internal sealed class JumpsPerk : IVipPerk, IEventListener
     public string Description => "Allows VIP players to jump additional times mid-air.";
     public bool   DefaultEnabled => false;
 
-    public IReadOnlyList<VipPerkSetting> Settings { get; } =
-    [
-        new VipPerkSetting("extraJumps", "Extra Jumps", VipPerkSettingType.Int, "1", "0", "5"),
-    ];
+    public IReadOnlyList<VipPerkSetting> Settings { get; }
 
     private IVipShared?       _vip;
     private IVipPerkRegistry? _registry;
@@ -31,19 +29,29 @@ internal sealed class JumpsPerk : IVipPerk, IEventListener
     private readonly IHookManager  _hookManager;
     private readonly IEventManager _eventManager;
     private readonly ILogger       _logger;
+    private readonly JumpsConfig   _config;
 
     private readonly Action<IPlayerSpawnForwardParams> _onSpawn;
     private readonly Func<IPlayerRunCommandHookParams, HookReturnValue<EmptyHookReturn>, HookReturnValue<EmptyHookReturn>> _onRunCommand;
 
     private readonly Dictionary<ulong, JumpState> _states = new();
 
-    public JumpsPerk(ISharedSystem sharedSystem, ILogger logger)
+    public JumpsPerk(ISharedSystem sharedSystem, ILogger logger, JumpsConfig config)
     {
         _hookManager  = sharedSystem.GetHookManager();
         _eventManager = sharedSystem.GetEventManager();
         _logger       = logger;
+        _config       = config;
         _onSpawn      = OnPlayerSpawn;
         _onRunCommand = OnPlayerRunCommandPre;
+
+        Settings =
+        [
+            new VipPerkSetting("extraJumpsCT", "Extra Jumps (CT)", VipPerkSettingType.Int,
+                _config.TeamExtraJumps.TryGetValue("CT", out var ct) ? ct.ToString() : "1", "0", "5"),
+            new VipPerkSetting("extraJumpsT", "Extra Jumps (T)", VipPerkSettingType.Int,
+                _config.TeamExtraJumps.TryGetValue("T", out var t) ? t.ToString() : "1", "0", "5"),
+        ];
     }
 
     internal void SetDependencies(IVipShared vip, IVipPerkRegistry registry)
@@ -85,8 +93,12 @@ internal sealed class JumpsPerk : IVipPerk, IEventListener
         var prefs = _registry?.GetPreferences(controller.SteamId, Id);
         if (prefs is null || !prefs.Enabled) return;
 
-        prefs.Settings.TryGetValue("extraJumps", out var raw);
-        var extra = int.TryParse(raw, out var e) ? e : 1;
+        var teamKey = controller.Team == CStrikeTeam.CT ? "CT" : "T";
+        var settingKey = controller.Team == CStrikeTeam.CT ? "extraJumpsCT" : "extraJumpsT";
+
+        prefs.Settings.TryGetValue(settingKey, out var raw);
+        _config.TeamExtraJumps.TryGetValue(teamKey, out var configDefault);
+        var extra = int.TryParse(raw, out var e) ? e : configDefault;
 
         if (_states.TryGetValue(controller.SteamId, out var s))
         {

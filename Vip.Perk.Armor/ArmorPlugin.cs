@@ -20,7 +20,7 @@ public sealed class ArmorPlugin : IModSharpModule
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<ArmorPlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
         _config = ArmorConfig.Load(sharpPath);
-        _perk   = new ArmorPerk(sharedSystem, _logger);
+        _perk   = new ArmorPerk(sharedSystem, _logger, _config);
     }
 
     public bool Init()

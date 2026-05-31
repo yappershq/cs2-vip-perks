@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Sharp.Shared;
 using Sharp.Shared.HookParams;
 using Sharp.Shared.Managers;
+using Vip.Perk.Armor.Configuration;
 using Vip.Shared;
 using Vip.Shared.Perks;
 
@@ -13,28 +14,32 @@ internal sealed class ArmorPerk : IVipPerk
 {
     public string Id          => "armor";
     public string DisplayName => "Armor";
-    public string Description => "Grants kevlar (and optionally helmet) on spawn.";
+    public string Description => "Grants kevlar on spawn.";
     public bool   DefaultEnabled => false;
 
-    public IReadOnlyList<VipPerkSetting> Settings { get; } =
-    [
-        new VipPerkSetting("kevlar", "Kevlar Amount", VipPerkSettingType.Int,  "100", "1", "100"),
-        new VipPerkSetting("helmet", "Give Helmet",   VipPerkSettingType.Bool, "true"),
-    ];
+    public IReadOnlyList<VipPerkSetting> Settings { get; }
 
     private IVipShared?       _vip;
     private IVipPerkRegistry? _registry;
 
-    private readonly IHookManager _hookManager;
-    private readonly ILogger      _logger;
+    private readonly IHookManager  _hookManager;
+    private readonly ILogger       _logger;
+    private readonly ArmorConfig   _config;
 
     private readonly Action<IPlayerSpawnForwardParams> _onSpawn;
 
-    public ArmorPerk(ISharedSystem sharedSystem, ILogger logger)
+    public ArmorPerk(ISharedSystem sharedSystem, ILogger logger, ArmorConfig config)
     {
         _hookManager = sharedSystem.GetHookManager();
         _logger      = logger;
+        _config      = config;
         _onSpawn     = OnPlayerSpawn;
+
+        Settings =
+        [
+            new VipPerkSetting("armorValue", "Armor Value", VipPerkSettingType.Int,
+                _config.ArmorValue.ToString(), "1", "100"),
+        ];
     }
 
     internal void SetDependencies(IVipShared vip, IVipPerkRegistry registry)
@@ -60,16 +65,10 @@ internal sealed class ArmorPerk : IVipPerk
         var pawn = controller.GetPlayerPawn();
         if (pawn?.IsValidEntity is not true) return;
 
-        prefs.Settings.TryGetValue("kevlar", out var rawKevlar);
-        prefs.Settings.TryGetValue("helmet", out var rawHelmet);
+        prefs.Settings.TryGetValue("armorValue", out var raw);
+        var armor = int.TryParse(raw, out var k) ? k : _config.ArmorValue;
 
-        var kevlar = int.TryParse(rawKevlar, out var k)   ? k    : 100;
-        var helmet = !bool.TryParse(rawHelmet, out var h) || h;
-
-        pawn.ArmorValue = kevlar;
-        var itemSvc = pawn.GetItemService();
-        if (itemSvc is not null) itemSvc.HasHelmet = helmet;
-
-        _logger.LogInformation("[Vip.Perk.Armor] kevlar={k} helmet={h} for {n}", kevlar, helmet, controller.PlayerName);
+        pawn.ArmorValue = armor;
+        _logger.LogInformation("[Vip.Perk.Armor] armor={a} for {n}", armor, controller.PlayerName);
     }
 }

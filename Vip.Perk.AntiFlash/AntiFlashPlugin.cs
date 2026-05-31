@@ -20,7 +20,7 @@ public sealed class AntiFlashPlugin : IModSharpModule
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<AntiFlashPlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
         _config = AntiFlashConfig.Load(sharpPath);
-        _perk   = new AntiFlashPerk(sharedSystem, _logger);
+        _perk   = new AntiFlashPerk(sharedSystem, _logger, _config);
     }
 
     public bool Init()

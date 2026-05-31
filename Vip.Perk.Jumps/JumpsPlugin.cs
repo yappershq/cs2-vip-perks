@@ -20,7 +20,7 @@ public sealed class JumpsPlugin : IModSharpModule
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<JumpsPlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
         _config = JumpsConfig.Load(sharpPath);
-        _perk   = new JumpsPerk(sharedSystem, _logger);
+        _perk   = new JumpsPerk(sharedSystem, _logger, _config);
     }
 
     public bool Init()

@@ -1,1 +1,4 @@
-{ "enabled": false }
+{
+  "enabled": false,
+  "usageLimit": -1
+}

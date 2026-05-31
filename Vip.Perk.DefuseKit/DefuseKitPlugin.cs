@@ -20,7 +20,7 @@ public sealed class DefuseKitPlugin : IModSharpModule
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<DefuseKitPlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
         _config = DefuseKitConfig.Load(sharpPath);
-        _perk   = new DefuseKitPerk(sharedSystem, _logger);
+        _perk   = new DefuseKitPerk(sharedSystem, _logger, _config);
     }
 
     public bool Init()

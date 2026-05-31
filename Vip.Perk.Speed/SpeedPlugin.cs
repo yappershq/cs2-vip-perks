@@ -20,7 +20,7 @@ public sealed class SpeedPlugin : IModSharpModule
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<SpeedPlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
         _config = SpeedConfig.Load(sharpPath);
-        _perk   = new SpeedPerk(sharedSystem, _logger);
+        _perk   = new SpeedPerk(sharedSystem, _logger, _config);
     }
 
     public bool Init()

@@ -5,6 +5,7 @@ using Sharp.Shared;
 using Sharp.Shared.Enums;
 using Sharp.Shared.HookParams;
 using Sharp.Shared.Managers;
+using Vip.Perk.DefuseKit.Configuration;
 using Vip.Shared;
 using Vip.Shared.Perks;
 
@@ -17,21 +18,31 @@ internal sealed class DefuseKitPerk : IVipPerk
     public string Description => "Gives CT-side VIP players a free defuse kit on spawn.";
     public bool   DefaultEnabled => false;
 
-    public IReadOnlyList<VipPerkSetting> Settings { get; } = [];
+    public IReadOnlyList<VipPerkSetting> Settings { get; }
 
     private IVipShared?       _vip;
     private IVipPerkRegistry? _registry;
 
-    private readonly IHookManager _hookManager;
-    private readonly ILogger      _logger;
+    private readonly IHookManager      _hookManager;
+    private readonly ILogger           _logger;
+    private readonly DefuseKitConfig   _config;
+
+    private readonly Dictionary<ulong, int> _usageCounts = new();
 
     private readonly Action<IPlayerSpawnForwardParams> _onSpawn;
 
-    public DefuseKitPerk(ISharedSystem sharedSystem, ILogger logger)
+    public DefuseKitPerk(ISharedSystem sharedSystem, ILogger logger, DefuseKitConfig config)
     {
         _hookManager = sharedSystem.GetHookManager();
         _logger      = logger;
+        _config      = config;
         _onSpawn     = OnPlayerSpawn;
+
+        Settings =
+        [
+            new VipPerkSetting("usageLimit", "Usage Limit (-1 = unlimited)", VipPerkSettingType.Int,
+                _config.UsageLimit.ToString(), "-1", "100"),
+        ];
     }
 
     internal void SetDependencies(IVipShared vip, IVipPerkRegistry registry)
@@ -54,6 +65,16 @@ internal sealed class DefuseKitPerk : IVipPerk
 
         var prefs = _registry?.GetPreferences(controller.SteamId, Id);
         if (prefs is null || !prefs.Enabled) return;
+
+        prefs.Settings.TryGetValue("usageLimit", out var raw);
+        var limit = int.TryParse(raw, out var l) ? l : _config.UsageLimit;
+
+        if (limit >= 0)
+        {
+            _usageCounts.TryGetValue(controller.SteamId, out var count);
+            if (count >= limit) return;
+            _usageCounts[controller.SteamId] = count + 1;
+        }
 
         var pawn = controller.GetPlayerPawn();
         if (pawn?.IsValidEntity is not true) return;

@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Sharp.Shared;
+using Sharp.Shared.Enums;
 using Sharp.Shared.GameEntities;
 using Sharp.Shared.Listeners;
 using Sharp.Shared.Managers;
 using Sharp.Shared.Types;
+using Vip.Perk.SmokeColor.Configuration;
 using Vip.Shared;
 using Vip.Shared.Perks;
 
@@ -14,26 +16,31 @@ internal sealed class SmokeColorPerk : IVipPerk, IEntityListener
 {
     public string Id          => "smoke_color";
     public string DisplayName => "Smoke Color";
-    public string Description => "Changes the smoke grenade color for VIP players.";
+    public string Description => "Changes the smoke grenade color for VIP players based on team.";
     public bool   DefaultEnabled => false;
 
-    public IReadOnlyList<VipPerkSetting> Settings { get; } =
-    [
-        new VipPerkSetting("color", "Smoke Color (R,G,B)", VipPerkSettingType.String, "255,0,255"),
-    ];
+    public IReadOnlyList<VipPerkSetting> Settings { get; }
 
     private IVipShared?       _vip;
     private IVipPerkRegistry? _registry;
 
-    private readonly IEntityManager _entityManager;
-    private readonly IModSharp      _modSharp;
-    private readonly ILogger        _logger;
+    private readonly IEntityManager   _entityManager;
+    private readonly IModSharp        _modSharp;
+    private readonly ILogger          _logger;
+    private readonly SmokeColorConfig _config;
 
-    public SmokeColorPerk(ISharedSystem sharedSystem, ILogger logger)
+    public SmokeColorPerk(ISharedSystem sharedSystem, ILogger logger, SmokeColorConfig config)
     {
         _entityManager = sharedSystem.GetEntityManager();
         _modSharp      = sharedSystem.GetModSharp();
         _logger        = logger;
+        _config        = config;
+
+        Settings =
+        [
+            new VipPerkSetting("teamColor", "Team Color (CT/T JSON)", VipPerkSettingType.String,
+                "CT:0,180,255 T:255,180,0"),
+        ];
     }
 
     internal void SetDependencies(IVipShared vip, IVipPerkRegistry registry)
@@ -68,17 +75,13 @@ internal sealed class SmokeColorPerk : IVipPerk, IEntityListener
             var prefs = _registry?.GetPreferences(controller.SteamId, Id);
             if (prefs is null || !prefs.Enabled) return;
 
-            prefs.Settings.TryGetValue("color", out var rawColor);
-            byte r = 255, g = 0, b = 255;
-            if (!string.IsNullOrWhiteSpace(rawColor))
+            var teamKey = controller.Team == CStrikeTeam.CT ? "CT" : "T";
+            int r = 255, g = 0, b = 255;
+            if (_config.TeamColor.TryGetValue(teamKey, out var rgb) && rgb.Length == 3)
             {
-                var parts = rawColor.Split(',');
-                if (parts.Length == 3)
-                {
-                    byte.TryParse(parts[0].Trim(), out r);
-                    byte.TryParse(parts[1].Trim(), out g);
-                    byte.TryParse(parts[2].Trim(), out b);
-                }
+                r = rgb[0];
+                g = rgb[1];
+                b = rgb[2];
             }
 
             ent.SetNetVar("m_vSmokeColor", new Vector(r, g, b));

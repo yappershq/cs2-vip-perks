@@ -1,1 +1,7 @@
-{ "enabled": false }
+{
+  "enabled": false,
+  "teamItems": {
+    "CT": [],
+    "T": []
+  }
+}

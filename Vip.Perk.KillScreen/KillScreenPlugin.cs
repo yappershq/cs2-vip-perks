@@ -20,7 +20,7 @@ public sealed class KillScreenPlugin : IModSharpModule
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<KillScreenPlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
         _config = KillScreenConfig.Load(sharpPath);
-        _perk   = new KillScreenPerk(sharedSystem, _logger);
+        _perk   = new KillScreenPerk(sharedSystem, _logger, _config);
     }
 
     public bool Init()

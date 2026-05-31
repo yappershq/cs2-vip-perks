@@ -6,6 +6,7 @@ using Sharp.Shared.GameEvents;
 using Sharp.Shared.Listeners;
 using Sharp.Shared.Managers;
 using Sharp.Shared.Objects;
+using Vip.Perk.LifeSteal.Configuration;
 using Vip.Shared;
 using Vip.Shared.Perks;
 
@@ -18,21 +19,26 @@ internal sealed class LifeStealPerk : IVipPerk, IEventListener
     public string Description => "Restores a percentage of damage dealt as HP on kill.";
     public bool   DefaultEnabled => false;
 
-    public IReadOnlyList<VipPerkSetting> Settings { get; } =
-    [
-        new VipPerkSetting("percent", "Steal % (0.0–1.0)", VipPerkSettingType.Float, "0.25", "0.0", "1.0"),
-    ];
+    public IReadOnlyList<VipPerkSetting> Settings { get; }
 
     private IVipShared?       _vip;
     private IVipPerkRegistry? _registry;
 
-    private readonly IEventManager _eventManager;
-    private readonly ILogger       _logger;
+    private readonly IEventManager   _eventManager;
+    private readonly ILogger         _logger;
+    private readonly LifeStealConfig _config;
 
-    public LifeStealPerk(ISharedSystem sharedSystem, ILogger logger)
+    public LifeStealPerk(ISharedSystem sharedSystem, ILogger logger, LifeStealConfig config)
     {
         _eventManager = sharedSystem.GetEventManager();
         _logger       = logger;
+        _config       = config;
+
+        Settings =
+        [
+            new VipPerkSetting("percent", "Steal % (0–100)", VipPerkSettingType.Float,
+                _config.Percent.ToString(System.Globalization.CultureInfo.InvariantCulture), "0", "100"),
+        ];
     }
 
     internal void SetDependencies(IVipShared vip, IVipPerkRegistry registry)
@@ -71,9 +77,9 @@ internal sealed class LifeStealPerk : IVipPerk, IEventListener
 
         prefs.Settings.TryGetValue("percent", out var raw);
         var pct = float.TryParse(raw, System.Globalization.NumberStyles.Float,
-            System.Globalization.CultureInfo.InvariantCulture, out var f) ? f : 0.25f;
+            System.Globalization.CultureInfo.InvariantCulture, out var f) ? f : _config.Percent;
 
-        var heal  = (int)MathF.Round(death.Damage * pct);
+        var heal  = (int)MathF.Floor(death.Damage * pct / 100.0f);
         var newHp = Math.Min(pawn.Health + heal, pawn.MaxHealth);
         pawn.Health = newHp;
 

@@ -20,7 +20,7 @@ public sealed class MoneyPlugin : IModSharpModule
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<MoneyPlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
         _config = MoneyConfig.Load(sharpPath);
-        _perk   = new MoneyPerk(sharedSystem, _logger);
+        _perk   = new MoneyPerk(sharedSystem, _logger, _config);
     }
 
     public bool Init()

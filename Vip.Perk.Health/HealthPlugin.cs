@@ -20,7 +20,7 @@ public sealed class HealthPlugin : IModSharpModule
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<HealthPlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
         _config = HealthConfig.Load(sharpPath);
-        _perk   = new HealthPerk(sharedSystem, _logger);
+        _perk   = new HealthPerk(sharedSystem, _logger, _config);
     }
 
     public bool Init()

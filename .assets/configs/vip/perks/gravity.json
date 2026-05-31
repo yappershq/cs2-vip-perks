@@ -1,1 +1,4 @@
-{ "enabled": false }
+{
+  "enabled": false,
+  "gravityScale": 0.9
+}

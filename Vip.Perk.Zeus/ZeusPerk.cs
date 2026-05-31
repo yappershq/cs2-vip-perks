@@ -5,6 +5,7 @@ using Sharp.Shared;
 using Sharp.Shared.Enums;
 using Sharp.Shared.HookParams;
 using Sharp.Shared.Managers;
+using Vip.Perk.Zeus.Configuration;
 using Vip.Shared;
 using Vip.Shared.Perks;
 
@@ -17,21 +18,29 @@ internal sealed class ZeusPerk : IVipPerk
     public string Description => "Grants VIP players a free Zeus (taser) on spawn.";
     public bool   DefaultEnabled => false;
 
-    public IReadOnlyList<VipPerkSetting> Settings { get; } = [];
+    public IReadOnlyList<VipPerkSetting> Settings { get; }
 
     private IVipShared?       _vip;
     private IVipPerkRegistry? _registry;
 
     private readonly IHookManager _hookManager;
     private readonly ILogger      _logger;
+    private readonly ZeusConfig   _config;
 
     private readonly Action<IPlayerSpawnForwardParams> _onSpawn;
 
-    public ZeusPerk(ISharedSystem sharedSystem, ILogger logger)
+    public ZeusPerk(ISharedSystem sharedSystem, ILogger logger, ZeusConfig config)
     {
         _hookManager = sharedSystem.GetHookManager();
         _logger      = logger;
+        _config      = config;
         _onSpawn     = OnPlayerSpawn;
+
+        Settings =
+        [
+            new VipPerkSetting("mode", "Mode", VipPerkSettingType.Int,
+                _config.Mode.ToString(), "-1", "1"),
+        ];
     }
 
     internal void SetDependencies(IVipShared vip, IVipPerkRegistry registry)

@@ -20,7 +20,7 @@ public sealed class ZeusPlugin : IModSharpModule
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<ZeusPlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
         _config = ZeusConfig.Load(sharpPath);
-        _perk   = new ZeusPerk(sharedSystem, _logger);
+        _perk   = new ZeusPerk(sharedSystem, _logger, _config);
     }
 
     public bool Init()

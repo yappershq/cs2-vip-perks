@@ -5,6 +5,7 @@ using Sharp.Shared;
 using Sharp.Shared.Listeners;
 using Sharp.Shared.Managers;
 using Sharp.Shared.Objects;
+using Vip.Perk.AntiFlash.Configuration;
 using Vip.Shared;
 using Vip.Shared.Perks;
 
@@ -14,24 +15,29 @@ internal sealed class AntiFlashPerk : IVipPerk, IEventListener
 {
     public string Id          => "anti_flash";
     public string DisplayName => "Anti Flash";
-    public string Description => "Reduces or removes flashbang blindness for VIP players.";
+    public string Description => "Reduces flashbang blindness for VIP players.";
     public bool   DefaultEnabled => false;
 
-    public IReadOnlyList<VipPerkSetting> Settings { get; } =
-    [
-        new VipPerkSetting("reductionPercent", "Reduction (0-1)", VipPerkSettingType.Float, "0.5", "0.0", "1.0"),
-    ];
+    public IReadOnlyList<VipPerkSetting> Settings { get; }
 
     private IVipShared?       _vip;
     private IVipPerkRegistry? _registry;
 
-    private readonly IEventManager _eventManager;
-    private readonly ILogger       _logger;
+    private readonly IEventManager      _eventManager;
+    private readonly ILogger            _logger;
+    private readonly AntiFlashConfig    _config;
 
-    public AntiFlashPerk(ISharedSystem sharedSystem, ILogger logger)
+    public AntiFlashPerk(ISharedSystem sharedSystem, ILogger logger, AntiFlashConfig config)
     {
         _eventManager = sharedSystem.GetEventManager();
         _logger       = logger;
+        _config       = config;
+
+        Settings =
+        [
+            new VipPerkSetting("mode", "Mode (1=team,2=self,3=both)", VipPerkSettingType.Int,
+                _config.Mode.ToString(), "1", "3"),
+        ];
     }
 
     internal void SetDependencies(IVipShared vip, IVipPerkRegistry registry)
@@ -61,14 +67,34 @@ internal sealed class AntiFlashPerk : IVipPerk, IEventListener
         var prefs = _registry?.GetPreferences(player.SteamId, Id);
         if (prefs is null || !prefs.Enabled) return;
 
+        var attacker = e.GetPlayerController("attacker");
+        if (attacker?.IsValidEntity is not true) return;
+
         var pawn = player.GetPlayerPawn();
         if (pawn?.IsValidEntity is not true) return;
 
-        prefs.Settings.TryGetValue("reductionPercent", out var raw);
-        var reduction = float.TryParse(raw, System.Globalization.NumberStyles.Float,
-            System.Globalization.CultureInfo.InvariantCulture, out var f) ? f : 0.5f;
+        prefs.Settings.TryGetValue("mode", out var raw);
+        var mode = int.TryParse(raw, out var m) ? m : _config.Mode;
 
-        pawn.FlashDuration *= (1f - Math.Clamp(reduction, 0f, 1f));
+        var sameTeam = attacker.Team == player.Team;
+        switch (mode)
+        {
+            case 1:
+                if (sameTeam && player.SteamId != attacker.SteamId)
+                    pawn.FlashDuration = 0f;
+                break;
+            case 2:
+                if (player.SteamId == attacker.SteamId)
+                    pawn.FlashDuration = 0f;
+                break;
+            case 3:
+                if (sameTeam || player.SteamId == attacker.SteamId)
+                    pawn.FlashDuration = 0f;
+                break;
+            default:
+                pawn.FlashDuration = 0f;
+                break;
+        }
     }
 
     int IEventListener.ListenerVersion  => IEventListener.ApiVersion;

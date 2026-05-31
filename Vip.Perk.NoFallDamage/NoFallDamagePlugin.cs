@@ -20,7 +20,7 @@ public sealed class NoFallDamagePlugin : IModSharpModule
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<NoFallDamagePlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
         _config = NoFallDamageConfig.Load(sharpPath);
-        _perk   = new NoFallDamagePerk(sharedSystem, _logger);
+        _perk   = new NoFallDamagePerk(sharedSystem, _logger, _config);
     }
 
     public bool Init()

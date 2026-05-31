@@ -1,1 +1,4 @@
-{ "enabled": false }
+{
+  "enabled": false,
+  "armorValue": 50
+}

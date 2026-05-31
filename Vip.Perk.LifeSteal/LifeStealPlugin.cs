@@ -20,7 +20,7 @@ public sealed class LifeStealPlugin : IModSharpModule
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<LifeStealPlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
         _config = LifeStealConfig.Load(sharpPath);
-        _perk   = new LifeStealPerk(sharedSystem, _logger);
+        _perk   = new LifeStealPerk(sharedSystem, _logger, _config);
     }
 
     public bool Init()

@@ -20,7 +20,7 @@ public sealed class SmokeColorPlugin : IModSharpModule
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<SmokeColorPlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
         _config = SmokeColorConfig.Load(sharpPath);
-        _perk   = new SmokeColorPerk(sharedSystem, _logger);
+        _perk   = new SmokeColorPerk(sharedSystem, _logger, _config);
     }
 
     public bool Init()

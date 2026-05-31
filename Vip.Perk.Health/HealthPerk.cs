@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Sharp.Shared;
 using Sharp.Shared.HookParams;
 using Sharp.Shared.Managers;
+using Vip.Perk.Health.Configuration;
 using Vip.Shared;
 using Vip.Shared.Perks;
 
@@ -16,24 +17,29 @@ internal sealed class HealthPerk : IVipPerk
     public string Description => "Grants extra HP on spawn.";
     public bool   DefaultEnabled => false;
 
-    public IReadOnlyList<VipPerkSetting> Settings { get; } =
-    [
-        new VipPerkSetting("extraHp", "Extra HP", VipPerkSettingType.Int, "25", "0", "200"),
-    ];
+    public IReadOnlyList<VipPerkSetting> Settings { get; }
 
     private IVipShared?       _vip;
     private IVipPerkRegistry? _registry;
 
-    private readonly IHookManager _hookManager;
-    private readonly ILogger      _logger;
+    private readonly IHookManager  _hookManager;
+    private readonly ILogger       _logger;
+    private readonly HealthConfig  _config;
 
     private readonly Action<IPlayerSpawnForwardParams> _onSpawn;
 
-    public HealthPerk(ISharedSystem sharedSystem, ILogger logger)
+    public HealthPerk(ISharedSystem sharedSystem, ILogger logger, HealthConfig config)
     {
         _hookManager = sharedSystem.GetHookManager();
         _logger      = logger;
+        _config      = config;
         _onSpawn     = OnPlayerSpawn;
+
+        Settings =
+        [
+            new VipPerkSetting("healthValue", "Health Value (total HP)", VipPerkSettingType.Int,
+                _config.HealthValue.ToString(), "100", "500"),
+        ];
     }
 
     internal void SetDependencies(IVipShared vip, IVipPerkRegistry registry)
@@ -59,10 +65,9 @@ internal sealed class HealthPerk : IVipPerk
         var pawn = controller.GetPlayerPawn();
         if (pawn?.IsValidEntity is not true) return;
 
-        prefs.Settings.TryGetValue("extraHp", out var raw);
-        var extra = int.TryParse(raw, out var e) ? e : 25;
+        prefs.Settings.TryGetValue("healthValue", out var raw);
+        var hp = int.TryParse(raw, out var h) ? h : _config.HealthValue;
 
-        var hp = 100 + extra;
         pawn.Health    = hp;
         pawn.MaxHealth = hp;
 

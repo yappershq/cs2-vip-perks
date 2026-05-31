@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Sharp.Shared;
+using Sharp.Shared.Enums;
 using Sharp.Shared.HookParams;
 using Sharp.Shared.Managers;
+using Vip.Perk.Items.Configuration;
 using Vip.Shared;
 using Vip.Shared.Perks;
 
@@ -16,10 +18,7 @@ internal sealed class ItemsPerk : IVipPerk
     public string Description => "Grants extra weapons or grenades to VIP players on spawn.";
     public bool   DefaultEnabled => false;
 
-    public IReadOnlyList<VipPerkSetting> Settings { get; } =
-    [
-        new VipPerkSetting("items", "Item class names (CSV, e.g. weapon_ak47)", VipPerkSettingType.String, ""),
-    ];
+    public IReadOnlyList<VipPerkSetting> Settings { get; }
 
     private IVipShared?       _vip;
     private IVipPerkRegistry? _registry;
@@ -27,15 +26,22 @@ internal sealed class ItemsPerk : IVipPerk
     private readonly IHookManager _hookManager;
     private readonly IModSharp    _modSharp;
     private readonly ILogger      _logger;
+    private readonly ItemsConfig  _config;
 
     private readonly Action<IPlayerSpawnForwardParams> _onSpawn;
 
-    public ItemsPerk(ISharedSystem sharedSystem, ILogger logger)
+    public ItemsPerk(ISharedSystem sharedSystem, ILogger logger, ItemsConfig config)
     {
         _hookManager = sharedSystem.GetHookManager();
         _modSharp    = sharedSystem.GetModSharp();
         _logger      = logger;
+        _config      = config;
         _onSpawn     = OnPlayerSpawn;
+
+        Settings =
+        [
+            new VipPerkSetting("teamItems", "Team Items (JSON: {\"CT\":[...],\"T\":[...]})", VipPerkSettingType.String, ""),
+        ];
     }
 
     internal void SetDependencies(IVipShared vip, IVipPerkRegistry registry)
@@ -58,11 +64,9 @@ internal sealed class ItemsPerk : IVipPerk
         var prefs = _registry?.GetPreferences(controller.SteamId, Id);
         if (prefs is null || !prefs.Enabled) return;
 
-        prefs.Settings.TryGetValue("items", out var rawItems);
-        if (string.IsNullOrWhiteSpace(rawItems)) return;
-
-        var items = rawItems.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        if (items.Length == 0) return;
+        var teamKey = controller.Team == CStrikeTeam.CT ? "CT" : "T";
+        _config.TeamItems.TryGetValue(teamKey, out var teamItems);
+        if (teamItems is null || teamItems.Length == 0) return;
 
         _modSharp.InvokeFrameAction(() =>
         {
@@ -71,7 +75,7 @@ internal sealed class ItemsPerk : IVipPerk
             var pawn = ctrl.GetPlayerPawn();
             if (pawn?.IsValidEntity is not true) return;
 
-            foreach (var item in items)
+            foreach (var item in teamItems)
             {
                 if (!item.StartsWith("weapon_") && !item.StartsWith("item_")) continue;
                 pawn.GiveNamedItem(item);

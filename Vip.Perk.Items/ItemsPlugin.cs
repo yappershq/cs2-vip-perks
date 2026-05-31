@@ -20,7 +20,7 @@ public sealed class ItemsPlugin : IModSharpModule
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<ItemsPlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
         _config = ItemsConfig.Load(sharpPath);
-        _perk   = new ItemsPerk(sharedSystem, _logger);
+        _perk   = new ItemsPerk(sharedSystem, _logger, _config);
     }
 
     public bool Init()

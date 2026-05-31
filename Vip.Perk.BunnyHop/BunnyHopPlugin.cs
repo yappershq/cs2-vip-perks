@@ -20,7 +20,7 @@ public sealed class BunnyHopPlugin : IModSharpModule
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<BunnyHopPlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
         _config = BunnyHopConfig.Load(sharpPath);
-        _perk   = new BunnyHopPerk(sharedSystem, _logger);
+        _perk   = new BunnyHopPerk(sharedSystem, _logger, _config);
     }
 
     public bool Init()

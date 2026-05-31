@@ -1,1 +1,4 @@
-{ "enabled": false }
+{
+  "enabled": false,
+  "bonusAmount": 1000
+}

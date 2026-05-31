@@ -20,7 +20,7 @@ public sealed class GravityPlugin : IModSharpModule
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<GravityPlugin>();
         _bridge = new InterfaceBridge(sharedSystem);
         _config = GravityConfig.Load(sharpPath);
-        _perk   = new GravityPerk(sharedSystem, _logger);
+        _perk   = new GravityPerk(sharedSystem, _logger, _config);
     }
 
     public bool Init()
