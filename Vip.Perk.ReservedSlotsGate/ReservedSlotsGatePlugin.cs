@@ -1,3 +1,6 @@
+using System;
+using System.IO;
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 using Sharp.Shared;
 
@@ -25,6 +28,19 @@ public sealed class ReservedSlotsGatePlugin : IModSharpModule
     public void PostInit() { }
 
     public void OnAllModulesLoaded()
+    {
+        try { SetupGate(); }
+        catch (Exception ex) when (ex is FileNotFoundException or TypeLoadException
+                                      or MissingMethodException or MissingMemberException)
+        {
+            _logger.LogWarning(
+                "[Vip.Perk.ReservedSlotsGate] target plugin's Shared DLL is missing or outdated — perk inactive ({Ex}): {Msg}",
+                ex.GetType().Name, ex.Message);
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void SetupGate()
     {
         if (!_bridge.Resolve())
         {
