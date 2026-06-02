@@ -1,23 +1,29 @@
 <Solution>
+  <!-- Active perks deployed to production -->
   <Project Path="Vip.Perk.AntiFlash/Vip.Perk.AntiFlash.csproj" />
   <Project Path="Vip.Perk.Armor/Vip.Perk.Armor.csproj" />
   <Project Path="Vip.Perk.BunnyHop/Vip.Perk.BunnyHop.csproj" />
   <Project Path="Vip.Perk.DefuseKit/Vip.Perk.DefuseKit.csproj" />
-  <Project Path="Vip.Perk.Gravity/Vip.Perk.Gravity.csproj" />
   <Project Path="Vip.Perk.Health/Vip.Perk.Health.csproj" />
   <Project Path="Vip.Perk.Healthshot/Vip.Perk.Healthshot.csproj" />
-  <Project Path="Vip.Perk.Items/Vip.Perk.Items.csproj" />
-  <Project Path="Vip.Perk.Jumps/Vip.Perk.Jumps.csproj" />
-  <Project Path="Vip.Perk.KillScreen/Vip.Perk.KillScreen.csproj" />
-  <Project Path="Vip.Perk.LifeSteal/Vip.Perk.LifeSteal.csproj" />
-  <Project Path="Vip.Perk.Money/Vip.Perk.Money.csproj" />
-  <Project Path="Vip.Perk.NoFallDamage/Vip.Perk.NoFallDamage.csproj" />
-  <Project Path="Vip.Perk.SmokeColor/Vip.Perk.SmokeColor.csproj" />
-  <Project Path="Vip.Perk.Speed/Vip.Perk.Speed.csproj" />
-  <Project Path="Vip.Perk.Zeus/Vip.Perk.Zeus.csproj" />
   <Project Path="Vip.Perk.HitMarker/Vip.Perk.HitMarker.csproj" />
+  <Project Path="Vip.Perk.KillScreen/Vip.Perk.KillScreen.csproj" />
+  <Project Path="Vip.Perk.Money/Vip.Perk.Money.csproj" />
   <Project Path="Vip.Perk.PissmodGate/Vip.Perk.PissmodGate.csproj" />
   <Project Path="Vip.Perk.PoopGate/Vip.Perk.PoopGate.csproj" />
   <Project Path="Vip.Perk.ReservedSlotsGate/Vip.Perk.ReservedSlotsGate.csproj" />
+  <Project Path="Vip.Perk.SmokeColor/Vip.Perk.SmokeColor.csproj" />
   <Project Path="Vip.Perk.WeaponMenuGate/Vip.Perk.WeaponMenuGate.csproj" />
+
+  <!-- Disabled — pay-to-win flavoured, not shipped per operator decision.
+       Sources retained for future re-enable. -->
+  <!--
+  <Project Path="Vip.Perk.Gravity/Vip.Perk.Gravity.csproj" />
+  <Project Path="Vip.Perk.Items/Vip.Perk.Items.csproj" />
+  <Project Path="Vip.Perk.Jumps/Vip.Perk.Jumps.csproj" />
+  <Project Path="Vip.Perk.LifeSteal/Vip.Perk.LifeSteal.csproj" />
+  <Project Path="Vip.Perk.NoFallDamage/Vip.Perk.NoFallDamage.csproj" />
+  <Project Path="Vip.Perk.Speed/Vip.Perk.Speed.csproj" />
+  <Project Path="Vip.Perk.Zeus/Vip.Perk.Zeus.csproj" />
+  -->
 </Solution>
